@@ -505,7 +505,7 @@ function ContactSection() {
     e.preventDefault();
     setLoading(true);
     
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby36-NZoz2ASAvU3jNf_3okJ95tCgQFzi76LTRMdaugbCG_RrYf2Xnljp-tYbVpEmQ/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNrCpS3IZi7ZS5yiezQw_TupNs5b_D5R7wLvbQLdlUv_UzGuClNU-zOlpj3eZYAT2U/exec';
     
     try {
       // We use no-cors if the Google Script doesn't handle CORS explicitly, 
