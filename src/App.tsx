@@ -488,10 +488,52 @@ function ServiceSection() {
 
 function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    tel: '',
+    email: '',
+    message: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWcYrH4xOqAs51nvVlD7h3-8cO42rgFVhQAcZMgMHq43r8q4l1adpN4K05Y83jFcxwYw/exec';
+    
+    try {
+      // We use no-cors if the Google Script doesn't handle CORS explicitly, 
+      // but standard fetch usually works for simple POSTs to these URLs.
+      // Note: Google Apps Script Web Apps often redirect, fetch handles this.
+      const formBody = new URLSearchParams();
+      formBody.append('name', formData.name);
+      formBody.append('tel', formData.tel);
+      formBody.append('email', formData.email);
+      formBody.append('message', formData.message);
+
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Standard for simple Google Script submissions
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formBody.toString()
+      });
+
+      setSubmitted(true);
+      setFormData({ name: '', tel: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('문의 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -509,7 +551,8 @@ function ContactSection() {
               </div>
             </div>
             <h2 className="text-4xl font-elegant font-bold text-rich-charcoal leading-tight">Thank You!</h2>
-            <p className="mt-6 text-slate-500 text-lg">We have received your message and will get back to you shortly.</p>
+            <p className="mt-6 text-slate-600 text-xl font-semibold">문의가 성공적으로 접수되었습니다!</p>
+            <p className="mt-2 text-slate-400 text-sm">빠른 시일 내에 답변 드리겠습니다.</p>
             <button 
               onClick={() => setSubmitted(false)}
               className="mt-16 text-sm font-bold text-rose-gold hover:tracking-widest transition-all uppercase"
@@ -533,39 +576,67 @@ function ContactSection() {
                 <div>
                   <label className="block text-[10px] font-black text-rose-gold uppercase tracking-widest mb-3 md:mb-4 ml-1">이름 (회사)</label>
                   <input 
-                    required type="text"
-                    className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm"
+                    required 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    type="text"
+                    disabled={loading}
+                    className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm disabled:opacity-50"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-rose-gold uppercase tracking-widest mb-3 md:mb-4 ml-1">전화번호</label>
                   <input 
-                    required type="tel"
-                    className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm"
+                    required 
+                    name="tel"
+                    value={formData.tel}
+                    onChange={handleChange}
+                    type="tel"
+                    disabled={loading}
+                    className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-black text-rose-gold uppercase tracking-widest mb-3 md:mb-4 ml-1">이메일 주소</label>
                 <input 
-                  required type="email"
-                  className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm"
+                  required 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  type="email"
+                  disabled={loading}
+                  className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal shadow-sm text-sm disabled:opacity-50"
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-black text-rose-gold uppercase tracking-widest mb-3 md:mb-4 ml-1">타겟 시장 (주관식)</label>
                 <textarea 
-                  required rows={5}
-                  className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal resize-none shadow-sm text-sm"
+                  required 
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={5}
+                  disabled={loading}
+                  className="w-full px-5 py-4 md:px-7 md:py-5 bg-[#FDFBFB] border border-rose-gold/10 rounded-2xl md:rounded-3xl focus:outline-none focus:ring-4 focus:ring-rose-gold/5 focus:border-rose-gold transition-all font-medium text-rich-charcoal resize-none shadow-sm text-sm disabled:opacity-50"
                 ></textarea>
               </div>
               <motion.button 
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: loading ? 1 : 1.01 }}
+                whileTap={{ scale: loading ? 1 : 0.98 }}
                 type="submit" 
-                className="w-full py-6 bg-rose-gold text-white font-bold rounded-3xl hover:bg-deep-rose transition-all shadow-xl shadow-rose-gold/20 tracking-widest uppercase text-xs mt-4"
+                disabled={loading}
+                className="w-full py-6 bg-rose-gold text-white font-bold rounded-3xl hover:bg-deep-rose transition-all shadow-xl shadow-rose-gold/20 tracking-widest uppercase text-xs mt-4 flex items-center justify-center gap-3 disabled:bg-slate-300 disabled:shadow-none"
               >
-                문의 보내기
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    전송 중...
+                  </>
+                ) : (
+                  '문의 보내기'
+                )}
               </motion.button>
             </form>
           </motion.div>
