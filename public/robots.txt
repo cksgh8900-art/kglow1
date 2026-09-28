@@ -1,0 +1,11 @@
+# K-Glow robots.txt
+User-agent: *
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://kglowofficial.co.kr/sitemap.xml
